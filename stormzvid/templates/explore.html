@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import platform_icon %}
+{% set active_page = 'explore' %}
+
+{% block title %}Explore platforms – StormzVid{% endblock %}
+{% block description %}Pick a platform and download videos from it. Each downloader only accepts links from its own platform.{% endblock %}
+
+{% block content %}
+    <section class="explore">
+      <div class="container">
+        <div class="section-head center">
+          <p class="eyebrow">Explore</p>
+          <h1 class="explore-title">Pick a platform.</h1>
+          <p class="section-sub">Each downloader only accepts links from its own platform, so you always know what you’re pasting into.</p>
+        </div>
+
+        <div class="explore-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="exploreSearch" type="search" autocomplete="off" placeholder="Search platforms..." aria-label="Search platforms">
+        </div>
+
+        <div class="explore-grid" id="exploreGrid">
+          {% for p in platforms %}
+          <a class="pcard" href="{{ platform_url(p.slug) }}" data-search="{{ (p.name ~ ' ' ~ p.slug ~ ' ' ~ p.blurb) | lower }}">
+            <div class="pcard-top">
+              {{ platform_icon(p) }}
+              {% if p.limited %}<span class="tag" title="{{ p.note }}">Limited</span>{% endif %}
+            </div>
+            <h2 class="pcard-name">{{ p.name }}</h2>
+            <p class="pcard-blurb">{{ p.blurb }}</p>
+            <span class="pcard-go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+
+        <p id="exploreEmpty" class="explore-empty" hidden>No platforms match your search.</p>
+
+        <p class="fineprint explore-note">
+          “Limited” platforms often block downloads or require a login, so some links won’t work.
+          Availability always depends on platform support and content permissions.
+        </p>
+      </div>
+    </section>
+{% endblock %}

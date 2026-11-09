@@ -1,0 +1,79 @@
+{% from "_macros.html" import brand %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}StormzVid – Simple video downloader{% endblock %}</title>
+  <meta name="description" content="{% block description %}Paste a supported video link, choose a format and download it. No account required.{% endblock %}">
+
+  {# Browser-tab icon: static/icons/stormz.ico, falling back to Stormz.png #}
+  {% set ico = favicon_ico() %}
+  {% set logo = brand_icon() %}
+  {% if ico %}<link rel="icon" href="{{ ico }}" sizes="any">
+  {% elif logo %}<link rel="icon" type="image/png" href="{{ logo }}">{% endif %}
+
+  <script>
+    /* Apply the saved theme before first paint to avoid a flash. Dark is the default. */
+    (function () {
+      try {
+        var t = localStorage.getItem("stormzvid-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      {{ brand() }}
+
+      <nav class="tabs" aria-label="Main">
+        <a class="tab{% if active_page == 'youtube' %} is-active{% endif %}" href="{{ url_for('home') }}">YouTube</a>
+        {% if active_page == 'platform' %}
+          <a class="tab is-active" href="{{ platform_url(p.slug) }}">{{ p.name }}</a>
+        {% endif %}
+        <a class="tab" href="{{ url_for('home') }}#how">How it works</a>
+        <a class="tab" href="{{ url_for('home') }}#faq">FAQ</a>
+      </nav>
+
+      <div class="header-actions">
+        <button type="button" id="themeToggle" class="icon-btn" aria-label="Switch to light mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        </button>
+        <a class="btn btn-primary btn-sm{% if active_page == 'explore' %} is-current{% endif %}" href="{{ url_for('explore') }}"{% if active_page == 'explore' %} aria-current="page"{% endif %}>
+          Explore
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      {{ brand() }}
+      <p class="footer-text">A simple, thoughtful way to save supported videos in the format you need.</p>
+      <div class="footer-bottom">
+        <span>© {{ year }} StormzVid. All rights reserved.</span>
+        <span>Download only content you own or have permission to save.</span>
+      </div>
+    </div>
+  </footer>
+
+  <a class="help-fab" href="{{ url_for('home') }}#faq" aria-label="Common questions">?</a>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

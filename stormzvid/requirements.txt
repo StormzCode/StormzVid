@@ -1,0 +1,4 @@
+Flask>=3.0
+# Not pinned on purpose: sites change often, so newer yt-dlp releases fix broken extractors.
+yt-dlp
+imageio-ffmpeg

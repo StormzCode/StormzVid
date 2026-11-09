@@ -1,0 +1,24 @@
+{# Small reusable pieces shared by the templates. #}
+
+{# Platform icon: your file from static/icons/ if it exists, otherwise a coloured letter tile. #}
+{% macro platform_icon(p, size="md") %}
+  {% set src = icon_for(p.slug) %}
+  <span class="picon picon-{{ size }}{% if not src %} is-fallback{% endif %}" style="--c: {{ p.color }}" aria-hidden="true">
+    {%- if src %}<img src="{{ src }}" alt="" loading="lazy">{% else %}{{ p.name[0] }}{% endif -%}
+  </span>
+{% endmacro %}
+
+{# StormzVid logo: static/icons/Stormz.png if it exists, otherwise the built-in violet tile. #}
+{% macro brand() %}
+  {% set logo = brand_icon() %}
+  <a class="brand" href="{{ url_for('home') }}" aria-label="StormzVid home">
+    <span class="brand-mark{% if logo %} has-img{% endif %}" aria-hidden="true">
+      {%- if logo %}
+        <img src="{{ logo }}" alt="">
+      {%- else %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="m8 10 4 4 4-4"/><path d="M5 17v1.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V17"/></svg>
+      {%- endif %}
+    </span>
+    <span class="brand-name"><strong>Stormz</strong>Vid</span>
+  </a>
+{% endmacro %}

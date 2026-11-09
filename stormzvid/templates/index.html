@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% from "_macros.html" import platform_icon %}
+{% set active_page = 'youtube' if p.slug == 'youtube' else 'platform' %}
+
+{% block title %}{{ p.name }} Video Downloader – StormzVid{% endblock %}
+{% block description %}Paste a {{ p.name }} link, choose a format and download it. No account required.{% endblock %}
+
+{% block content %}
+
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="download">
+      <div class="container hero-inner">
+        <span class="badge"><i class="badge-dot"></i>Simple, direct, dependable</span>
+
+        <h1>
+          <span class="h1-line">{{ p.name }} Video</span>
+          <span class="h1-line h1-muted">Downloader</span>
+        </h1>
+
+        <p class="lead">Paste a {{ p.name }} video link and choose the format you need. No complicated steps, no account required.</p>
+
+        <form id="urlForm" class="input-card" novalidate>
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <input id="urlInput" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
+                 placeholder="Paste your {{ p.name }} link here..." aria-label="{{ p.name }} video link">
+          <button id="fetchBtn" type="submit" class="btn btn-primary">
+            <span class="btn-label">Get video</span>
+            <span class="spinner" aria-hidden="true"></span>
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10"/><path d="m8 10 4 4 4-4"/><path d="M5 20h14"/></svg>
+          </button>
+        </form>
+
+        <ul class="hints">
+          <li>No account required</li>
+          <li>Clear download status</li>
+          <li>Use only with permitted content</li>
+        </ul>
+
+        {% if p.note %}
+        <p class="platform-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></svg>
+          {{ p.note }}
+        </p>
+        {% endif %}
+
+        <!-- Status area -->
+        <div id="mismatchBox" class="alert alert-warn" role="alert" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19Z"/><path d="M12 10v4.5M12 17.5v.01"/></svg>
+          <span><span id="mismatchText"></span> <a id="mismatchLink" class="alert-link" href="#"></a></span>
+        </div>
+
+        <div id="errorBox" class="alert alert-error" role="alert" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+          <span id="errorText"></span>
+        </div>
+
+        <div id="loadingBox" class="loading" role="status" aria-live="polite" hidden>
+          <span class="spinner spinner-lg" aria-hidden="true"></span>
+          <span id="loadingText">Reading the link…</span>
+        </div>
+
+        <!-- Result card (filled in by script.js) -->
+        <article id="resultCard" class="result" hidden>
+          <div class="result-thumb">
+            <img id="thumb" alt="" referrerpolicy="no-referrer">
+            <span id="duration" class="duration" hidden></span>
+          </div>
+          <div class="result-body">
+            <span id="platformPill" class="pill"></span>
+            <h2 id="videoTitle" class="result-title"></h2>
+            <p id="videoMeta" class="result-meta"></p>
+
+            <p class="result-label">Choose a format</p>
+            <div id="formatList" class="chips" role="radiogroup" aria-label="Format"></div>
+
+            <div class="result-actions">
+              <button id="downloadBtn" type="button" class="btn btn-primary">
+                <span class="btn-label">Download file</span>
+                <span class="spinner" aria-hidden="true"></span>
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10"/><path d="m8 10 4 4 4-4"/><path d="M5 20h14"/></svg>
+              </button>
+              <p id="downloadStatus" class="status" role="status" aria-live="polite"></p>
+            </div>
+          </div>
+        </article>
+
+        <p class="switch-hint">Want another platform? <a href="{{ url_for('explore') }}">Explore all platforms →</a></p>
+      </div>
+    </section>
+
+    <!-- ===== Platforms ===== -->
+    <section class="platforms">
+      <div class="container">
+        <p class="eyebrow-muted">Works with supported content from</p>
+        <ul class="platform-list">
+          {% for f in featured %}
+          <li><a class="plink" href="{{ platform_url(f.slug) }}">{{ platform_icon(f, "sm") }}<span>{{ f.name }}</span></a></li>
+          {% endfor %}
+          <li><a class="plink plink-more" href="{{ url_for('explore') }}">+ {{ extra_count }} more</a></li>
+        </ul>
+        <p class="fineprint">Availability depends on platform support and content permissions.</p>
+      </div>
+    </section>
+
+    <!-- ===== How it works ===== -->
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-head center">
+          <p class="eyebrow">A simpler workflow</p>
+          <h2 class="section-title">From link to file in three steps.</h2>
+          <p class="section-sub">No clutter, no confusing options. Just a clear path to the format you need.</p>
+        </div>
+
+        <div class="steps">
+          <article class="card step">
+            <div class="card-top">
+              <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9.5 12h5M9.5 16h5"/></svg></span>
+              <span class="step-no">01</span>
+            </div>
+            <h3>Paste a link</h3>
+            <p>Copy the URL of {{ p.name }} content and place it in the field above.</p>
+          </article>
+          <article class="card step">
+            <div class="card-top">
+              <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/></svg></span>
+              <span class="step-no">02</span>
+            </div>
+            <h3>Choose a format</h3>
+            <p>Select from the quality and format options available for that video.</p>
+          </article>
+          <article class="card step">
+            <div class="card-top">
+              <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m8 11 4 4 4-4"/><path d="M5 20h14"/></svg></span>
+              <span class="step-no">03</span>
+            </div>
+            <h3>Download your file</h3>
+            <p>Save the file directly to your device when processing is complete.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Features ===== -->
+    <section class="section">
+      <div class="container features">
+        <div class="features-copy">
+          <p class="eyebrow">Built around the essentials</p>
+          <h2 class="section-title">Everything you need.<br>Nothing you don’t.</h2>
+          <p class="section-sub">StormzVid keeps the experience focused, understandable, and respectful of your time.</p>
+          <a class="link-arrow" href="#faq">Read common questions
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+
+        <div class="feature-grid">
+          <article class="card feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5Z"/></svg>
+            <h3>Quality options</h3>
+            <p>Choose from the resolutions made available by the source.</p>
+          </article>
+          <article class="card feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+            <h3>Video &amp; audio formats</h3>
+            <p>Pick the practical output format that fits your needs.</p>
+          </article>
+          <article class="card feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <h3>Fast processing</h3>
+            <p>A focused workflow keeps every step clear and efficient.</p>
+          </article>
+          <article class="card feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <h3>Privacy-conscious design</h3>
+            <p>No account required, with transparent status at each step.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section" id="faq">
+      <div class="container faq">
+        <div class="faq-head">
+          <p class="eyebrow">Good to know</p>
+          <h2 class="section-title">Clear answers, before you begin.</h2>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>Which links are supported?</summary>
+            <p>This page accepts {{ p.name }} links only ({{ p.domains | join(", ") }}). To download from a different platform, pick it in <a class="inline-link" href="{{ url_for('explore') }}">Explore</a>. Private, age-restricted, login-only or region-locked videos can’t be downloaded, and if extraction fails you’ll see a clear message instead of a broken download.</p>
+          </details>
+          <details>
+            <summary>Do I need to create an account?</summary>
+            <p>No. There’s no sign-up and nothing is stored. Files are processed in a temporary folder and deleted as soon as your download finishes.</p>
+          </details>
+          <details>
+            <summary>Can I choose video quality?</summary>
+            <p>Yes. After you paste a link you’ll see the resolutions the source offers, up to 4K (2160p), plus an audio-only option. Some 4K streams need FFmpeg to combine video and audio. Downloads are limited to {{ max_mb }} MB per file, so pick a lower quality for very long videos.</p>
+          </details>
+          <details>
+            <summary>Which videos am I allowed to download?</summary>
+            <p>Only content you own, content in the public domain or under a licence that allows it, or content you have explicit permission to save. You’re responsible for respecting copyright and each platform’s terms of service.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <script id="stormz-config" type="application/json">{{ {"platform": p.slug, "name": p.name, "platforms": platform_map} | tojson }}</script>
+{% endblock %}
